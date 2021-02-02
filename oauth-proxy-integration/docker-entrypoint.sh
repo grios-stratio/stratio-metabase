@@ -20,7 +20,15 @@ elif [[ "$USE_GOSEC_SSO_AUTH" != "true" ]]; then
     envsubst '\$NGINX_ERROR_LOG_LEVEL \$PROXY_READ_TIMEOUT' < ${nginx_conf_dir}/nginx.conf.native-auth > ${nginx_conf_dir}/nginx.conf
 else
     # we are delegating authentication in dcos-oauth so we use the corresponding nginx.conf
-    envsubst '\$NGINX_ERROR_LOG_LEVEL \$PROXY_READ_TIMEOUT' < ${nginx_conf_dir}/nginx.conf.sso-auth > ${nginx_conf_dir}/nginx.conf
+    if [[ "$LOG_ACCESS_DATA" = "true" ]]; then
+        export EMBED_TOKEN_USER_CLAIM="${EMBED_TOKEN_USER_CLAIM:-sub}"
+        export EXTRA_NGINX_LOG_PROPERTIES="${EXTRA_NGINX_LOG_PROPERTIES:-escape=json}"
+        # We log all the responses in the nginx
+        envsubst '\$NGINX_ERROR_LOG_LEVEL \$PROXY_READ_TIMEOUT \$EXTRA_NGINX_LOG_PROPERTIES \$EMBED_TOKEN_USER_CLAIM' < ${nginx_conf_dir}/nginx.conf.log-access-data > ${nginx_conf_dir}/nginx.conf
+    else
+        envsubst '\$NGINX_ERROR_LOG_LEVEL \$PROXY_READ_TIMEOUT' < ${nginx_conf_dir}/nginx.conf.sso-auth > ${nginx_conf_dir}/nginx.conf
+
+    fi
 fi
 
 source /usr/local/lib/b-log.sh

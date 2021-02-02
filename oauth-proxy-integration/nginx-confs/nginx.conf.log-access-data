@@ -1,0 +1,176 @@
+worker_processes  1;
+
+error_log /dev/stderr $NGINX_ERROR_LOG_LEVEL;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+
+    log_format main $EXTRA_NGINX_LOG_PROPERTIES '$time_iso8601 AUDIT $uid 1 nginx access_log'
+                    ' {"@message":"$remote_addr - $remote_user [$time_local] $request'
+                    ' $status $body_bytes_sent $http_referer $http_user_agent $http_x_forwarded_for $response_body"}';
+
+    access_log /dev/stdout main;
+
+    gzip_types
+        text/css
+        text/javascript
+        text/xml
+        text/plain
+        text/x-component
+        application/javascript
+        application/json
+        application/xml
+        application/rss+xml
+        font/truetype
+        font/opentype
+        application/vnd.ms-fontobject
+        image/svg+xml;
+
+    lua_package_path "/usr/local/openresty/lualib/?.lua;;";
+
+    init_by_lua_block {
+        auth = require "auth".init()
+        jwt  = require "resty.jwt"
+
+        function set_response_body()
+            local response_body = string.sub(ngx.arg[1], 1, -1)
+            ngx.ctx.buffered = (ngx.ctx.buffered or "") .. response_body
+            if ngx.arg[2] then
+                ngx.var.response_body = ngx.ctx.buffered
+            end
+        end
+
+        function set_user_from_embed_token_payload(encoded_payload)
+            local payload = jwt:jwt_decode(encoded_payload, true)
+            ngx.var.uid = payload["$EMBED_TOKEN_USER_CLAIM"]
+        end
+    }
+
+    server {
+        listen 443 ssl;
+        ssl_certificate     /etc/pki/proxy.pem;
+        ssl_certificate_key /etc/pki/proxy.key;
+
+        set $uid '-';
+        set $groups '';
+        set $tenant '';
+        set $err '';
+        set $response_body '-';
+
+
+        location / {
+            # Only api endpoints are authenticated (and not all of them, see below)
+            lua_need_request_body on;
+            access_by_lua_block {
+                auth.validate_jwt_or_login();
+            }
+            body_filter_by_lua_block {
+                set_response_body()
+            }
+
+            proxy_set_header  X-DCOS-OAUTH-USER $uid;
+            proxy_set_header  X-DCOS-OAUTH-GROUPS $groups;
+            proxy_set_header  X-DCOS-OAUTH-TENANT $tenant;
+
+            gzip on;
+            proxy_set_header Accept-Encoding "";
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+        # Exceptionally, the body of responses in xlsx format will be hidden with the string "redacted binary data".
+        location ~ ^/api/(card|dataset).*/xlsx$ {
+            access_by_lua_block {
+                auth.validate_jwt_or_login();
+            }
+            set $response_body 'redacted binary data';
+
+            proxy_set_header  X-DCOS-OAUTH-USER $uid;
+            proxy_set_header  X-DCOS-OAUTH-GROUPS $groups;
+            proxy_set_header  X-DCOS-OAUTH-TENANT $tenant;
+
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+        # Exceptionally, the body of responses in xlsx format will be hidden with the string "redacted binary data".
+        location ~ ^/api/embed/(dashboard|card)/([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+).*/xlsx$ {
+            # 1 -> dashboard or card; 2 -> header; 3 -> payload; 4 -> signature; 5 -> export format (excel)
+            set $token_payload $3;
+            body_filter_by_lua_block {
+                set_user_from_embed_token_payload(ngx.var.token_payload)
+            }
+            set $response_body 'redacted binary data';
+
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+
+        # the regex is to match the three parts of a jwt token (header.payload.signature)
+        # These endpoints always are of the form /<dasbboard or card>/<jwt token>/<optionally more things>
+        # We do not verify the token since if it is invalid metabase will not response with any data
+        location ~ ^/api/embed/(dashboard|card)/([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+).([a-zA-Z0-9-_]+) {
+            # 1 -> dashboard or card; 2 -> header; 3 -> payload; 4 -> signature
+            set $token_payload $3;
+            body_filter_by_lua_block {
+                set_user_from_embed_token_payload(ngx.var.token_payload)
+                set_response_body()
+            }
+
+            # we do not want to recived gzipped data from the backend since the logged body will be nonsense
+            # if that is the case. Modify the accept-encoding header and gzip the outgoing response here.
+            gzip on;
+            proxy_set_header Accept-Encoding "";
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+        # These endpoints are not authenticated (see metabase/routes.clj )
+        location ~ ^/(favicon.ico|app|public|embed) {
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+
+        # These api endpints are not authenticated (see metabase/api/routes.clj)
+        # session is also public in metabase but we must restrict access when using sso
+        # since in the metabase end we are just looking for some headers
+        # session/properties though we keep it open just in case these (public) properties are needed
+        location ~ ^/api/(geojson|public|setup|util|session/properties) {
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+        location /api/health {
+            proxy_pass http://127.0.0.1:3000;
+        }
+
+
+        location /discovery-cicd {
+            proxy_read_timeout ${PROXY_READ_TIMEOUT}s;
+            proxy_pass http://127.0.0.1:8087;
+        }
+
+
+        # login / logout for dcos-oauth (proxy authentication)
+        location ~ ^/(login|logout) {
+            proxy_pass http://127.0.0.1:8081;
+        }
+
+    }
+
+    # This server is needed for health check purposes
+    # TODO: once we open the health location these might not be needed
+    server {
+        listen 3009;
+
+        location "/api/health" {
+            proxy_pass http://127.0.0.1:3000;
+        }
+    }
+
+}

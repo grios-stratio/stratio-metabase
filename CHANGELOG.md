@@ -8,6 +8,8 @@
 * [ROCK-3110] Limit download records via variable
 * Bump import/export artifact version to 1.3.0-5ad831f
 * [ROCK-3762] Support deploy discovery into k8s (without security and SSO)
+* [ROCK-3933] Open public endpoints in sso proxy
+* [ROCK-3933] Option to log data accessed by users
 
 ## 0.39.0-f6c1d05 (Built: September 23, 2020 | Released: September 25, 2020)
 
