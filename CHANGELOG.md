@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.40.0 (upcoming)
+## 0.41.0 (upcoming)
+
+* Pending changelog
+
+## 0.40.0-2de4e86 (Built: March 01, 2021 | Pre-release)
 
 * Restoring impersonation in queries related to Crossdata databases and tables
 * Update Crossdata JDBC driver to 2.19.0-809dcaf version
