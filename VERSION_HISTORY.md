@@ -1,7 +1,7 @@
 # Version History
 
 
-#### 0.40.0-902ffea (Built: March 23, 2021 | Pre-release)
+#### 0.40.0-902ffea (Built: March 23, 2021 | Released: March 24, 2021)
 
 #### 0.39.3-fa66bb4 (Built: January 20, 2021 | Released: January 20, 2021)
 
