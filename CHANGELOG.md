@@ -4,7 +4,7 @@
 
 * Pending changelog
 
-## 0.38.1-0.1.0-98af12a (Built: April 07, 2021 | Pre-release)
+## 0.38.1-0.1.0-43ae714 (Built: April 09, 2021 | Pre-release)
 
 * Fork based on Metabase 0.38.1
 * Integration with Stratio Jenkins
