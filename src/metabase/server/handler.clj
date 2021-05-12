@@ -13,8 +13,8 @@
    [metabase.server.middleware.session :as mw.session]
    [metabase.server.middleware.ssl :as mw.ssl]
    [metabase.server.routes :as routes]
-   ;; < STRATIO - auto login from headers info
-   [metabase.stratio.auth :as st.auth]
+   ;; < STRATIO - add custom middleware
+   [metabase.stratio.middleware :as st.mw]
    ;; STRATIO />
    [metabase.util.log :as log]
    [ring.core.protocols :as ring.protocols]
@@ -51,7 +51,7 @@
    #'mw.browser-cookie/ensure-browser-id-cookie ; add cookie to identify browser; add `:browser-id` to the request
    #'mw.security/add-security-headers           ; Add HTTP headers to API responses to prevent them from being cached
    ;; < STRATIO - auto login from headers info
-   #'st.auth/forbid-editing-username         ; when auto-login enabled, respond with a 403 requests to edit user name
+   #'st.mw/forbid-editing-username           ; when auto-login enabled, respond with a 403 requests to edit user name
    ;; STRATIO />
    #(ring.json/wrap-json-body % {:keywords? true}) ; extracts json POST body and makes it available on request
    #'mw.offset-paging/handle-paging             ; binds per-request parameters to handle paging
@@ -62,8 +62,8 @@
    #'mw.session/reset-session-timeout           ; Resets the timeout cookie for user activity to [[mw.session/session-timeout]]
    #'mw.session/bind-current-user               ; Binds *current-user* and *current-user-id* if :metabase-user-id is non-nil
    #'mw.session/wrap-current-user-info          ; looks for :metabase-session-id and sets :metabase-user-id and other info if Session ID is valid
-   ;; < STRATIO - auto login from headers info
-   #'st.auth/auto-login                      ; if we cannot find a session-id look for user info in headers and create user and session
+   ;; < STRATIO - add custom middleware
+   #'st.mw/stratio-middleware                ; auto-login, forbid email login, add username in response header...
    ;; STRATIO />
    #'mw.session/wrap-session-id                 ; looks for a Metabase Session ID and assoc as :metabase-session-id
    #'mw.auth/wrap-static-api-key                ; looks for a static Metabase API Key on the request and assocs as :metabase-api-key
