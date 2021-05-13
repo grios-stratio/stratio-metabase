@@ -4,7 +4,7 @@
 
 * Pending changelog
 
-## 0.38.1-0.2.0-2e9fb16 (Built: May 13, 2021 | Pre-release)
+## 0.38.1-0.2.0-2e9fb16 (Built: May 13, 2021 | Released: May 13, 2021)
 
 * [ROCK-4533] Dynamic var telling if request is for DB syncing.
 
