@@ -13,7 +13,7 @@
 
 #### 0.38.2-c1f4adf (Built: July 23, 2020 | Released: July 23, 2020)
 
-#### 0.38.1-0.2.2-852de99 (Built: July 09, 2021 | Pre-release)
+#### 0.38.1-0.2.2-852de99 (Built: July 09, 2021 | Released: July 09, 2021)
 
 #### 0.38.1-0.2.1-53e63d5 (Built: June 15, 2021 | Released: June 16, 2021)
 
