@@ -3,6 +3,7 @@
 ## 0.40.7-0.1.0 (upcoming)
 
 * [ROCK-5578] Upgrade metabase to 0.40.7
+* [ROCK-5578] Fix new vulnerabilities
 
 ## 0.40.5-0.1.0 (November 22, 2021)
 
