@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.40.7-0.1.0 (upcoming)
+## 0.40.7-0.1.0 (December 14, 2021)
 
 * [ROCK-5578] Upgrade metabase to 0.40.7
 * [ROCK-5578] Fix new vulnerabilities
