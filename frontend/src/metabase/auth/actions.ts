@@ -12,6 +12,9 @@ import {
   trackPasswordReset,
 } from "./analytics";
 import { LoginData } from "./types";
+// < STRATIO - auto login from headers info (sso proxy integration)
+import MetabaseSettings from "metabase/lib/settings";
+// STRATIO />
 
 export const REFRESH_SESSION = "metabase/auth/REFRESH_SESSION";
 export const refreshSession = createThunkAction(
@@ -61,7 +64,14 @@ export const logout = createThunkAction(LOGOUT, () => {
     await dispatch(clearCurrentUser());
     trackLogout();
 
-    dispatch(push("/auth/login"));
+    // < STRATIO - auto login from headers info (sso proxy integration)
+    // we must redirect to the sso proxy logout
+    if (MetabaseSettings.get("gosec-sso-enabled", false)) {
+      dispatch(push("logout"));
+    } else {
+      dispatch(push("/auth/login"));
+    }
+    // STRATIO />
     window.location.reload();
   };
 });
