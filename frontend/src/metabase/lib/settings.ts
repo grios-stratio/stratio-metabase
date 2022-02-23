@@ -52,6 +52,9 @@ const PASSWORD_COMPLEXITY_CLAUSES = {
 
 // TODO: dump this from backend settings definitions
 export type SettingName =
+  // < STRATIO - auto login from headers
+  | "gosec-sso-enabled"
+  // STRATIO />
   | "admin-email"
   | "analytics-uuid"
   | "anon-tracking-enabled"
