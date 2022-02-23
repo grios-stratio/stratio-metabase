@@ -122,7 +122,14 @@ export const logout = createAsyncThunk(
         dispatch(clearCurrentUser());
         await dispatch(refreshLocale()).unwrap();
         trackLogout();
-        dispatch(push(Urls.login()));
+        // < STRATIO - auto login from headers info (sso proxy integration)
+        // we must redirect to the sso proxy logout
+        if (MetabaseSettings.get("gosec-sso-enabled", false)) {
+          dispatch(push("logout"));
+        } else {
+          dispatch(push(Urls.login()));
+        }
+        // STRATIO />
         reload(); // clears redux state and browser caches
       }
     } catch (error) {

@@ -25,6 +25,9 @@
    [metabase.server :as server]
    [metabase.server.handler :as handler]
    [metabase.setup :as setup]
+   ;; < STRATIO - auto login from headers info
+   [metabase.stratio.config :as st.config]
+   ;; STRATIO />
    [metabase.task :as task]
    [metabase.troubleshooting :as troubleshooting]
    [metabase.util :as u]
@@ -137,9 +140,12 @@
     (config-from-file/init-from-file-if-code-available!)
     (init-status/set-progress! 0.7)
     (when new-install?
-      (log/info "Looks like this is a new installation ... preparing setup wizard")
-      ;; create setup token
-      (create-setup-token-and-log-setup-url!)
+      ;; < STRATIO - auto login from headers info
+      (when-not st.config/should-auto-login?
+        (log/info "Looks like this is a new installation ... preparing setup wizard")
+        ;; create setup token
+        (create-setup-token-and-log-setup-url!))
+      ;; STRATIO />
       ;; publish install event
       (events/publish-event! :event/install {}))
     (init-status/set-progress! 0.8)
