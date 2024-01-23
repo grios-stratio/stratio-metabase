@@ -287,7 +287,10 @@
         query-results    (filter :card results)
         timezone         (-> query-results first :card defaulted-timezone)
         dashboard        (Dashboard :id dashboard-id)]
-    {:subject      (subject pulse)
+    ;; < STRATIO - use dashboard name instead of pulse name for emails
+    ;; {:subject      (subject pulse)
+    {:subject      (or (:name dashboard) (subject pulse))
+     ;; STRATIO >
      :recipients   email-recipients
      :message-type :attachments
      :message      (messages/render-pulse-email timezone pulse dashboard results)}))

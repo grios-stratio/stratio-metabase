@@ -280,7 +280,10 @@
 (defn- pulse-context [pulse dashboard]
   (merge (common-context)
          {:emailType                 "pulse"
-          :title                     (:name pulse)
+          ;; < STRATIO - use dashboard name instead of pulse name for emails
+          ;; :title                     (:name pulse)
+          :title                     (or (:name dashboard) (:name pulse))
+          ;; STRATIO >
           :titleUrl                  (params/dashboard-url (:id dashboard) (params/parameters pulse dashboard))
           :dashboardDescription      (:description dashboard)
           :creator                   (-> pulse :creator :common_name)
