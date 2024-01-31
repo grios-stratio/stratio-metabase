@@ -34,6 +34,13 @@
       ;; a set can act as a predicate!
       (some whitelist groups)))
 
+(defn- tenant-allowed?
+  [user-tenant]
+  (let [app-tenant (st.config/config-str :tenant)]
+    (or (not user-tenant)
+        (not app-tenant)
+        (= user-tenant app-tenant))))
+
 (defn- admin?
   [groups]
   (contains? (set groups) admin-group))
@@ -46,14 +53,16 @@
     superuser?         (conj group/admin-group-name)))
 
 (defn- allowed-user
-  [{:keys [user groups error]}]
+  [{:keys [user groups email tenant error]}]
   (if error
     {:error error}
-    (if (allowed? groups)
+    (if (and (allowed? groups) (tenant-allowed? tenant))
       {:first_name user
        :last_name ""
        :is_superuser (admin? groups)
-       :email (if (u/email? user) user (u/lower-case-en (str user dummy-email-domain)))
+       :email (cond email email
+                    (u/email? user) user
+                    :else (u/lower-case-en (str user dummy-email-domain)))
        :login_attributes {:groups groups}}
       {:error (str "User " user " not allowed")})))
 
@@ -102,8 +111,8 @@
         user-inserted)))
 
 (defn create-session-from-headers!
-  [{headers :headers, :as request}]
-  (let [user-info    (http-headers->user-info headers)
+  [request]
+  (let [user-info    (http-headers->user-info request)
         allowed-user (allowed-user user-info)]
     (log/debug "received user info " user-info)
     (if (:error allowed-user)
