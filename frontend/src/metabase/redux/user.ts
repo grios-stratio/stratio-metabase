@@ -43,7 +43,11 @@ export const currentUser = createReducer<User | null>(null, builder => {
       return state;
     })
     .addCase(Users.actionTypes.UPDATE, (state, { payload }) => {
-      const isCurrentUserUpdated = state?.id === payload.user.id;
+      // < STRATIO - forbid editing username, wihtout this change our error message does not show,
+      // instead, a "cannot read properties of undefined" error appears
+      // const isCurrentUserUpdated = state?.id === payload.user.id;
+      const isCurrentUserUpdated = state?.id === (payload.user?.id || -1);
+      // STRATIO >
       if (isCurrentUserUpdated) {
         return {
           ...state,
