@@ -55,7 +55,7 @@
       {:first_name user
        :last_name ""
        :is_superuser (admin? groups)
-       :email (cond email email
+       :email (cond (u/email? email) email
                     (u/email? user) user
                     :else (u/lower-case-en (str user dummy-email-domain)))
        :login_attributes {:groups groups}}
