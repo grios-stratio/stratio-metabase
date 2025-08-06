@@ -8,7 +8,14 @@ import type { AuthProvider } from "metabase/plugins/types";
 import { getApplicationName } from "metabase/selectors/whitelabel";
 import { Box, Divider } from "metabase/ui";
 
-import { getAuthProviders } from "../../selectors";
+// < STRATIO import getSSOEnabled selector and AuthButton
+import {
+  getAuthProviders,
+  getSSOEnabled,
+  getStratioLogoutUrl,
+} from "../../selectors";
+import { AuthButton } from "../AuthButton";
+// STRATIO >
 import { AuthLayout } from "../AuthLayout";
 
 interface LoginQueryString {
@@ -29,6 +36,10 @@ export const Login = ({ params, location }: LoginProps): JSX.Element => {
   const selection = getSelectedProvider(providers, params?.provider);
   const redirectUrl = location?.query?.redirect;
   const applicationName = useSelector(getApplicationName);
+  // < STRATIO
+  const gosecSSOEnabled = useSelector(getSSOEnabled);
+  const stratioLogoutUrl = useSelector(getStratioLogoutUrl);
+  // STRATIO >
 
   usePageTitle(t`Login`);
 
@@ -36,6 +47,30 @@ export const Login = ({ params, location }: LoginProps): JSX.Element => {
     providers,
     (provider) => provider.name === "password",
   );
+  // < STRATIO
+  if (gosecSSOEnabled) {
+    return (
+      <AuthLayout>
+        <Box
+          role="heading"
+          c="text-dark"
+          fz="1.25rem"
+          fw="bold"
+          lh="1.5rem"
+          ta="center"
+        >
+          {t`You are not allowed to access ${applicationName}`}
+        </Box>
+        <AuthButton
+          isCard={true}
+          onClick={() => (window.location.href = stratioLogoutUrl)}
+        >
+          {"Logout"}
+        </AuthButton>
+      </AuthLayout>
+    );
+  }
+  // STRATIO >
   return (
     <AuthLayout>
       <Box
