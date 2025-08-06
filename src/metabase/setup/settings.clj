@@ -4,6 +4,9 @@
    [metabase.config.core :as config]
    [metabase.settings.core :as setting :refer [defsetting]]
    [metabase.setup.db :as setup.db]
+   ;; < STATIO - login via headers/jwt - nevet go to setup page
+   [metabase.stratio.config :as st.config]
+   ;; STRATIO >
    [metabase.util.i18n :refer [deferred-tru tru]]))
 
 (defsetting setup-token
@@ -44,6 +47,9 @@
   ;;
   ;; This is keyed by the unique identifier for the application database, to support resetting it in tests or swapping
   ;; it out in the REPL
-  :getter     #'-has-user-setup
+  ;; < STRATIO - login via headers/jwt - never go to setup page
+  ;; :getter     #'-has-user-setup
+  :getter     (if st.config/should-auto-login? (constantly true) #'-has-user-setup)
+  ;; STRATIO >
   :doc        false
   :audit      :never)

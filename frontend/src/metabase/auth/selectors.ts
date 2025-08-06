@@ -17,3 +17,13 @@ export const getExternalAuthProviders = createSelector(
   [getAuthProviders],
   (providers) => providers.filter((provider) => provider.name !== "password"),
 );
+
+// < STRATIO login via headers/jwt - selector to use in login page
+export const getSSOEnabled = (state: State) => {
+  return getSetting(state, "gosec-sso-enabled");
+};
+
+export const getStratioLogoutUrl = (state: State) => {
+  return getSetting(state, "stratio-logout-url");
+};
+// STRATIO >

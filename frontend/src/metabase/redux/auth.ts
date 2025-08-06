@@ -156,6 +156,13 @@ export const logout = createAsyncThunk(
         await deleteSession(dispatch);
         await dispatch(refreshLocale()).unwrap();
 
+        // < STRATIO - auto login from headers/jwt
+        // we must redirect to the sso proxy logout
+        if (getSetting(state, "gosec-sso-enabled")) {
+          window.location.href = getSetting(state, "stratio-logout-url");
+          return;
+        }
+        // STRATIO >
         navigate(Urls.login());
         dispatch(Api.util.resetApiState());
         reload(); // clears redux state and browser caches

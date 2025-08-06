@@ -1,3 +1,6 @@
+// < STRATIO import useEffect, useNavigationType and reload
+import { useEffect } from "react";
+// STRATIO >
 import { useMount } from "react-use";
 import { t } from "ttag";
 import _ from "underscore";
@@ -5,11 +8,28 @@ import _ from "underscore";
 import { usePageTitle } from "metabase/hooks/use-page-title";
 import type { AuthProvider } from "metabase/plugins/types";
 import { useSelector } from "metabase/redux";
-import { prefetchPage, useParams, useSearchParams } from "metabase/router";
+import {
+  prefetchPage,
+  // < STRATIO
+  useNavigationType,
+  // STRATIO >
+  useParams,
+  useSearchParams,
+} from "metabase/router";
 import { getApplicationName } from "metabase/selectors/whitelabel";
 import { Box, Divider } from "metabase/ui";
+// < STRATIO
+import { reload } from "metabase/utils/dom";
+// STRATIO >
 
-import { getAuthProviders } from "../../selectors";
+// < STRATIO import getSSOEnabled selector and AuthCardButton
+import {
+  getAuthProviders,
+  getSSOEnabled,
+  getStratioLogoutUrl,
+} from "../../selectors";
+import { AuthCardButton } from "../AuthButton";
+// STRATIO >
 import { AuthLayout } from "../AuthLayout";
 
 type LoginQueryParams = {
@@ -23,6 +43,19 @@ export const Login = (): JSX.Element => {
   const selection = getSelectedProvider(providers, params.provider);
   const redirectUrl = searchParams.get("redirect") ?? undefined;
   const applicationName = useSelector(getApplicationName);
+  // < STRATIO
+  const gosecSSOEnabled = useSelector(getSSOEnabled);
+  const stratioLogoutUrl = useSelector(getStratioLogoutUrl);
+  const navigationType = useNavigationType();
+
+  // login via headers/jwt - reload page when sent to auth/login so that oauthredirect or autologin kicks in
+  useEffect(() => {
+    const hasBeenRedirected = navigationType !== "POP";
+    if (gosecSSOEnabled && hasBeenRedirected) {
+      reload();
+    }
+  }, [gosecSSOEnabled, navigationType]);
+  // STRATIO >
 
   usePageTitle(t`Login`);
 
@@ -39,6 +72,29 @@ export const Login = (): JSX.Element => {
     providers,
     (provider) => provider.name === "password",
   );
+  // < STRATIO
+  if (gosecSSOEnabled) {
+    return (
+      <AuthLayout>
+        <Box
+          role="heading"
+          c="text-primary"
+          fz="1.25rem"
+          fw="bold"
+          lh="1.5rem"
+          ta="center"
+        >
+          {t`You are not allowed to access ${applicationName}`}
+        </Box>
+        <AuthCardButton
+          onClick={() => (window.location.href = stratioLogoutUrl)}
+        >
+          {"Logout"}
+        </AuthCardButton>
+      </AuthLayout>
+    );
+  }
+  // STRATIO >
   return (
     <AuthLayout>
       <Box
