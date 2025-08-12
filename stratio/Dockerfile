@@ -58,7 +58,9 @@ COPY --from=builder /home/node/bin  /home/node/bin
 COPY --from=builder /home/node/src       /home/node/src
 COPY --from=builder /home/node/deps.edn  /home/node/deps.edn
 
-# add metabase uberjar
+# add metabase uberjar and needed drivers
+COPY --from=builder /home/node/modules/drivers/hive-like /home/node/modules/drivers/hive-like
+COPY --from=builder /home/node/modules/drivers/sparksql /home/node/modules/drivers/sparksql
 COPY --from=builder /home/node/target/uberjar/metabase.jar /home/node/target/uberjar/metabase.jar
 
 # STRATIO />
