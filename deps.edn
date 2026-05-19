@@ -64,6 +64,9 @@
   com.sun.mail/jakarta.mail                 ^:antq/exclude                      ; 2+ changes imports from javax.mail to jakarta.mail
                                             {:mvn/version "1.6.8"}              ; SMTP lib, required by postal
   com.taoensso/nippy                        {:mvn/version "3.6.0"}              ; Fast serialization (i.e., GZIP) library for Clojure
+  ;; < STRATIO - pin aircompressor to fix GHSA-vx9q-rhv9-3jvg (High); nippy 3.6.0 pulls 2.0.2 [ROCK-14826]
+  io.airlift/aircompressor                  {:mvn/version "2.0.3"}
+  ;; STRATIO >
   com.vladsch.flexmark/flexmark             {:mvn/version "0.64.8"}             ; Markdown parsing
   com.vladsch.flexmark/flexmark-ext-autolink
   {:mvn/version "0.64.8"}             ; Flexmark extension for auto-linking bare URLs
@@ -138,7 +141,9 @@
   org.apache.sshd/sshd-core                 {:mvn/version "2.15.0"              ; ssh tunneling and test server
                                              :exclusions  [org.slf4j/slf4j-api
                                                            org.slf4j/jcl-over-slf4j]}
-  org.apache.tika/tika-core                 {:mvn/version "3.1.0"}
+  ;; < STRATIO - bump to fix GHSA-f58c-gq56-vjjf (XXE injection, Critical) [ROCK-14826]
+  org.apache.tika/tika-core                 {:mvn/version "3.2.2"}
+  ;; STRATIO >
   org.apache.xmlgraphics/batik-all          {:mvn/version "1.19"}               ; SVG -> image
   org.bouncycastle/bcpkix-jdk18on           {:mvn/version "1.81"}               ; Bouncy Castle crypto library -- explicit version of BC specified to resolve illegal reflective access errors
   org.bouncycastle/bcprov-jdk18on           {:mvn/version "1.81"}
@@ -166,10 +171,12 @@
   org.clojure/tools.namespace               {:mvn/version "1.5.0"}
   org.clojure/tools.reader                  {:mvn/version "1.5.2"}
   org.clojure/tools.trace                   {:mvn/version "0.8.0"}              ; function tracing
-  org.eclipse.jetty/jetty-server            {:mvn/version "12.0.22"}
-  org.eclipse.jetty/jetty-unixdomain-server {:mvn/version "12.0.22"}
-  org.eclipse.jetty.ee9/jetty-ee9-servlet   {:mvn/version "12.0.22"}
-  org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-server {:mvn/version "12.0.21"}
+  ;; < STRATIO - bump to fix GHSA-355h-qmc2-wpwf and GHSA-xxh7-fcf3-rj7f (High) [ROCK-14826]
+  org.eclipse.jetty/jetty-server            {:mvn/version "12.0.33"}
+  org.eclipse.jetty/jetty-unixdomain-server {:mvn/version "12.0.33"}
+  org.eclipse.jetty.ee9/jetty-ee9-servlet   {:mvn/version "12.0.33"}
+  org.eclipse.jetty.ee9.websocket/jetty-ee9-websocket-jetty-server {:mvn/version "12.0.33"}
+  ;; STRATIO >
   org.flatland/ordered                      {:mvn/version "1.15.12"}            ; ordered maps & sets
   org.graalvm.polyglot/js-community         {:mvn/version "24.2.1" :extension "pom"} ; JavaScript engine
   org.graalvm.polyglot/polyglot             {:mvn/version "24.2.1"}             ; GraalVM platform, required by JS engine
