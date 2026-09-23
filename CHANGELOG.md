@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.56.25-0.1.2 (upcoming)
+
+* Update metabase to 0.56.25
+
 ## 0.56.4-0.1.2 (2026-06-08)
 
 * [ROCK-14826] Fix medium security vulnerabilities: jackson, log4j
