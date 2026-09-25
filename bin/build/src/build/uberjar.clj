@@ -76,9 +76,9 @@
   driver is present in the plugins directory."
   #{"oracle" "vertica"})
 
-;; < STRATIO - remove athena and databricks drivers to remove vulnerabilities
+;; < STRATIO - remove athena, clickhouse and databricks drivers to remove vulnerabilities
 (def ^:private drivers-removed-by-stratio
-  #{"athena" "databricks"})
+  #{"athena" "clickhouse" "databricks"})
 ;; STRATIO >
 
 (defn- all-drivers []

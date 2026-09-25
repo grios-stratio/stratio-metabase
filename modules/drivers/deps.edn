@@ -11,7 +11,10 @@
   ;; metabase/athena             {:local/root "athena"}
   ;; STRATIO >
   metabase/bigquery-cloud-sdk {:local/root "bigquery-cloud-sdk"}
-  metabase/clickhouse         {:local/root "clickhouse"}
+  ;; < STRATIO - remove clickhouse driver due to vulnerabilities: httpclient5 5.3.1 (CVE-2026-64607),
+  ;; httpcore5 5.2.4 (CVE-2026-54399) and httpcore5-h2 5.2.4 (CVE-2026-54428), pulled by clickhouse-jdbc 0.8.4
+  ;; metabase/clickhouse         {:local/root "clickhouse"}
+  ;; STRATIO >
   ;; < STRATIO - remove athena and databricks drivers, they have dependencies with vulnerabilities
   ;; metabase/databricks         {:local/root "databricks"}
   ;; STRATIO >
