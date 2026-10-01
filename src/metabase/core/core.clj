@@ -31,6 +31,9 @@
    [metabase.settings.core :as setting]
    [metabase.setup.core :as setup]
    [metabase.startup.core :as startup]
+   ;; < STRATIO - auto login from headers info
+   [metabase.stratio.config :as st.config]
+   ;; STRATIO />
    [metabase.system.core :as system]
    [metabase.task.core :as task]
    [metabase.tracing.core :as tracing]
@@ -220,7 +223,10 @@
     ;; initialize Metabase from an `config.yml` file if present (Enterprise Edition™ only)
     (config-from-file/init-from-file-if-code-available!)
     (init-status/set-progress! 0.6)
-    (if new-install?
+    ;; < STRATIO - auto login 
+    ;; (if new-install?
+    (if (and new-install? (not st.config/should-auto-login?))
+    ;; STRATIO >
       (do
         (log/info "Looks like this is a new installation ... preparing setup wizard")
         ;; create setup token

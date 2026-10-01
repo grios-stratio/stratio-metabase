@@ -21,6 +21,9 @@
    [metabase.server.middleware.settings-cache :as mw.settings-cache]
    [metabase.server.middleware.ssl :as mw.ssl]
    [metabase.server.middleware.trace :as mw.trace]
+   ;; < STRATIO - auto login from headers info
+   [metabase.stratio.auth :as st.auth]
+   ;; STRATIO />
    [metabase.util.log :as log]
    [metabase.util.malli :as mu]
    [ring.core.protocols :as ring.protocols]
@@ -88,6 +91,9 @@
         #'agent-api.usage/wrap-record-cli-usage      ; record CLI usage analytics for metabase-cli REST API calls
         #'mw.browser-cookie/ensure-browser-id-cookie ; add cookie to identify browser; add `:browser-id` to the request
         #'mw.security/add-security-headers           ; Add HTTP headers to API responses to prevent them from being cached
+        ;; < STRATIO - auto login from headers info
+        #'st.auth/forbid-editing-username         ; when auto-login enabled, respond with a 403 requests to edit user name
+        ;; STRATIO />
         #'mw.json/wrap-json-body                     ; extracts json POST/PUT body and makes it available on request
         #'mw.offset-paging/handle-paging             ; binds per-request parameters to handle paging
         #'mw.json/wrap-streamed-json-response        ; middleware to automatically serialize suitable objects as JSON in responses
@@ -100,6 +106,9 @@
         #'mw.session/reset-session-timeout           ; Resets the timeout cookie for user activity to [[metabase.request.cookies/session-timeout]]
         #'mw.session/bind-current-user               ; Binds *current-user* and *current-user-id* if :metabase-user-id is non-nil
         #'mw.session/wrap-current-user-info          ; looks for :metabase-session-key and sets :metabase-user-id and other info if Session ID is valid
+        ;; < STRATIO - auto login from headers info
+        #'st.auth/auto-login                      ; if we cannot find a session-id look for user info in headers and create user and session
+        ;; STRATIO />
         #'mw.pf-cache/wrap-premium-features-cache-check ; check cookie to refresh premium features cache if needed
         #'mw.settings-cache/wrap-settings-cache-check ; check cookie to refresh settings cache if needed
         #'analytics/embedding-mw                     ; reads sdk client headers, binds them to *client* and *version*, and tracks sdk-response metrics
