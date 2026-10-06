@@ -27,6 +27,7 @@
    ;; settings for authentication via headers
    :mb-user-header ""
    :mb-group-header ""
+   :mb-email-header ""
    :dummy-email-domain "@example.com"
 
    ;; identify users by email instead of first_name
