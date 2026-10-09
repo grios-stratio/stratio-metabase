@@ -62,9 +62,9 @@
        :last_name ""
        :is_superuser (admin? groups)
        ;; lower-cased because :model/User stores emails lower-cased, and users may be looked up by email
-       :email (cond (u/email? email) (u/lower-case-en email)
-                    (u/email? user) user
-                    :else (u/lower-case-en (str user dummy-email-domain)))
+       :email (u/lower-case-en (cond (u/email? email) email
+                                     (u/email? user)  user
+                                     :else            (str user dummy-email-domain)))
        ;; string keys, as :model/User returns them, so they can be compared with the stored ones
        :login_attributes {"groups" groups "uid" user}}
       {:error (str "User " user " not allowed")})))
