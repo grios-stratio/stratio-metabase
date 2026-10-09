@@ -42,7 +42,9 @@
     (let [user-id (Integer/parseInt (last (str/split uri #"/")))
           old-identifier (t2/select-one-fn st.config/user-identifier :model/User :id user-id)
           new-identifier (st.config/user-identifier body)]
-      (and old-identifier (not= old-identifier new-identifier)))))
+      (and old-identifier
+           (contains? body st.config/user-identifier)
+           (not= old-identifier new-identifier)))))
 
 (defn- add-session-to-request-and-response
   [handler session]
