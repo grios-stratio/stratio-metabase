@@ -65,7 +65,8 @@
        :email (cond (u/email? email) (u/lower-case-en email)
                     (u/email? user) user
                     :else (u/lower-case-en (str user dummy-email-domain)))
-       :login_attributes {:groups groups :uid user}}
+       ;; string keys, as :model/User returns them, so they can be compared with the stored ones
+       :login_attributes {"groups" groups "uid" user}}
       {:error (str "User " user " not allowed")})))
 
 (defn- insert-new-user!
@@ -98,7 +99,7 @@
         (log/error "Could not create and sync groups. Error:" (st.util/stack-trace e))))))
 
 (defn- fetch-or-create-user!
-  [{{groups :groups} :login_attributes superuser? :is_superuser, :as allowed-user}]
+  [{{groups "groups"} :login_attributes superuser? :is_superuser, :as allowed-user}]
   (try
     (or (when-let [user-in-db (t2/select-one :model/User st.config/user-identifier (st.config/user-identifier allowed-user))]
           ;; Check if superuser status has changed and update if necessary
