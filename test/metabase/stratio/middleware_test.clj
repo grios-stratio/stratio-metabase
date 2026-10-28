@@ -41,6 +41,8 @@
     (testing "requests are left untouched"
       (testing "without the trusted client header"
         (is (nil? (:metabase-user-id (impersonate {:headers {"x-mcp-impersonate" "mcp-uid"}})))))
+      (testing "when already authenticated"
+        (is (= 1 (:metabase-user-id (impersonate (merge (trusted "mcp-uid") {:metabase-user-id 1}))))))
       (testing "outside the MCP endpoints"
         (is (nil? (:metabase-user-id (impersonate (merge (trusted) {:uri "/api/card"}))))))
       (testing "with the MCP server disabled"

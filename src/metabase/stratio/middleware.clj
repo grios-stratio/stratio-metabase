@@ -137,11 +137,12 @@
 
 (defn- wrap-with-mcp-impersonation
   "Middleware that lets the MCP client trusted by the proxy (a verified client cert with a whitelisted CN) act as the
-  user named in the X-Mcp-Impersonate header, or as a placeholder user for the calls it makes without one. Must run
-  before the current user is bound."
+  user named in the X-Mcp-Impersonate header, or as a placeholder user for the calls it makes without one. Requests
+  already authenticated (session, API key...) are left untouched. Must run before the current user is bound."
   [handler]
   (fn [{:keys [uri headers] :as request} respond raise]
     (if-not (and st.config/mcp-impersonation-enabled?
+                 (not (:metabase-user-id request))
                  (= "true" (get headers "x-mcp-trusted-client"))
                  (some (partial str/starts-with? uri) mcp-endpoints)
                  (mcp/mcp-enabled?))
